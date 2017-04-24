@@ -26,15 +26,43 @@ class IkanmanSpider(scrapy.Spider):
 
     def __init__(self, *args, **kwargs):
         super(IkanmanSpider, self).__init__(*args, **kwargs)
-        self.start_urls = kwargs['start_urls']
         self.root_path = kwargs['root_path']
+        urls = kwargs['start_urls']
+        self.start_urls = [self.polish_url(url) for url in urls]
         print(self.start_urls)
 
-    title = ''
+    def polish_url(self, url):
+        url = url.strip('\n').strip()
+        pattern = 'http://www.ikanman.com/comic/([\d]+)'
+        url = re.search(pattern, url).group(0)
+        return url
+
+    def get_support_url(self, url):
+        pattern = 'http://www.ikanman.com/comic/([\d]+)'
+        cid = re.search(pattern, url).group(1)
+        support_url = 'http://www.ikanman.com/support/chapters.aspx?id={0}'.format(cid)
+        return support_url
 
     def parse(self, response):
         sel = Selector(response)
         title = sel.xpath('//h1/text()').extract()[0]
+        episode_selectors = sel.xpath('//li/a[@class="status0"]')
+        for episode_selector in episode_selectors:
+            subtitle = episode_selector.xpath('@title').extract()[0]
+            url = episode_selector.xpath('@href').extract()[0]
+            url = response.urljoin(url)
+            request = scrapy.Request(url, callback=self.parse_page_one)
+            request.meta['title'] = '{0}/{1}'.format(title, subtitle)
+            yield request
+        if not episode_selectors:
+            support_url = self.get_support_url(response.url)
+            request = scrapy.Request(support_url, callback=self.parse_support_page)
+            request.meta['title'] = title
+            yield request
+
+    def parse_support_page(self, response):
+        title = response.meta['title']
+        sel = Selector(response)
         episode_selectors = sel.xpath('//li/a[@class="status0"]')
         for episode_selector in episode_selectors:
             subtitle = episode_selector.xpath('@title').extract()[0]
@@ -92,7 +120,7 @@ class IkanmanSpider(scrapy.Spider):
         urls = ctx.call("getFiles", path, files, host)
 
         for idx, url in enumerate(urls):
-            img_name = "{0}/{1:03d}.jpg".format(title, idx+1)
+            img_name = "{0}/{1:03d}.jpg".format(title, idx + 1)
             img_path = os.path.join(self.root_path, img_name)
             if os.path.isfile(img_path):
                 continue

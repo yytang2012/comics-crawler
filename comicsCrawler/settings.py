@@ -24,7 +24,7 @@ ROBOTSTXT_OBEY = False
 
 
 URL_PATH = '~/novels/urlfile'
-ROOT_PATH = '~/comiccrawler/download'
+INDEX_FILE = 'index'
 
 #  Comics
 COMICS_ROOT_DIR = '~/comiccrawler/download'

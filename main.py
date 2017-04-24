@@ -1,9 +1,8 @@
-import os
 from collections import defaultdict
 
+from scrapy.conf import settings
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
-from scrapy.conf import settings
 
 from libs.misc import *
 from libs.urlcheck import url_check
@@ -15,7 +14,7 @@ class ComicsCrawler:
     def __init__(self):
         self._start_urls = defaultdict(lambda: [])
         self.url_path = os.path.expanduser(settings['URL_PATH'])
-        self.root_path = os.path.expanduser(settings['ROOT_PATH'])
+        self.root_path = os.path.expanduser(settings['IMAGES_STORE'])
         self.allowed_domains = self.get_allowed_domains(True)
 
     def get_allowed_domains(self, write_to_file=False):
