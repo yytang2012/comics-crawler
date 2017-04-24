@@ -16,7 +16,6 @@ class ComicscrawlerPipeline(ImagesPipeline):
     }
 
     def process_item(self, item, spider):
-        print("process_item")
         return super(ComicscrawlerPipeline, self).process_item(item, spider)
 
     def get_media_requests(self, item, info):

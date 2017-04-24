@@ -8,6 +8,7 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
+import os
 
 BOT_NAME = 'comicsCrawler'
 
@@ -24,6 +25,10 @@ ROBOTSTXT_OBEY = False
 
 URL_PATH = '~/novels/urlfile'
 ROOT_PATH = '~/comiccrawler/download'
+
+#  Comics
+COMICS_ROOT_DIR = '~/comiccrawler/download'
+IMAGES_STORE = os.path.expanduser(COMICS_ROOT_DIR)
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
@@ -43,7 +48,7 @@ ITEM_PIPELINES = {
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-#COOKIES_ENABLED = False
+COOKIES_ENABLED = True
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
