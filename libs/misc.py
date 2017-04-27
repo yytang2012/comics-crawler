@@ -26,7 +26,7 @@ def get_spider_name_from_url(url):
 
 
 def get_domain_from_url(url):
-    return re.search(r'http://([^\/]+)/', url).group(1)
+    return re.search(r'http.?://([^\/]+)/', url).group(1)
 
 
 @contextlib.contextmanager

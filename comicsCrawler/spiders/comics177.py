@@ -17,7 +17,7 @@ from comicsCrawler.items import ComicscrawlerItem
 from libs.misc import *
 
 
-class comics177Spider(scrapy.Spider):
+class Comics177Spider(scrapy.Spider):
     """
     classdocs
 
@@ -28,7 +28,7 @@ class comics177Spider(scrapy.Spider):
     allowed_domains = [dom]
 
     def __init__(self, *args, **kwargs):
-        super(comics177Spider, self).__init__(*args, **kwargs)
+        super(Comics177Spider, self).__init__(*args, **kwargs)
         urls = kwargs['start_urls']
         self.start_urls = [self.polish_url(url) for url in urls]
         print(self.start_urls)
