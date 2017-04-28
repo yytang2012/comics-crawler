@@ -29,6 +29,7 @@ class Comics177Spider(scrapy.Spider):
 
     def __init__(self, *args, **kwargs):
         super(Comics177Spider, self).__init__(*args, **kwargs)
+        self.root_path = kwargs['root_path']
         urls = kwargs['start_urls']
         self.start_urls = [self.polish_url(url) for url in urls]
         print(self.start_urls)
@@ -57,10 +58,14 @@ class Comics177Spider(scrapy.Spider):
         image_urls = sel.xpath('//img/@src').extract()
         image_number = len(image_urls)
         for picture_index in range(0, image_number):
+            image_name = "{0}/{1:03d}.jpg".format(title, start_image_index + picture_index)
+            image_path = os.path.join(self.root_path, image_name)
+            if os.path.isfile(image_path):
+                continue
             item = ComicscrawlerItem()
             item['image_urls'] = [image_urls[picture_index]]
             item['Referer'] = response.url
-            item['image_name'] = "{0}/{1:03d}.jpg".format(title, start_image_index + picture_index)
+            item['image_name'] = image_name
             yield item
 
         aa = sel.xpath('//p/a')

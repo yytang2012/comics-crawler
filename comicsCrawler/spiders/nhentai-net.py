@@ -21,11 +21,14 @@ class EhentaiSpider(scrapy.Spider):
     """
     classdocs
 
-    example: https://e-hentai.org/g/421552/4a24a76b83/
+    example: https://nhentai.net/g/127565/
     """
-    dom = 'e-hentai.org'
+    dom = 'nhentai.net'
     name = get_spider_name_from_domain(dom)
     allowed_domains = [dom]
+    custom_settings = {
+        'DOWNLOAD_DELAY': 0.3,
+    }
 
     def __init__(self, *args, **kwargs):
         super(EhentaiSpider, self).__init__(*args, **kwargs)
@@ -52,38 +55,34 @@ class EhentaiSpider(scrapy.Spider):
         if title_key in response.meta:
             title = response.meta[title_key]
         else:
-            ss = sel.xpath('//h1/text()').extract()[0]
-            title = ss.replace(u'[中文]', '')
+            ss = sel.xpath('//h2/text()').extract()[0]
+            title = ss.replace(' ', '-')
 
-        image_web_urls = sel.xpath('//div[@class="gdtm"]/div/a/@href').extract()
+        image_web_urls = sel.xpath('//div[@class="container"]/div[@class="thumb-container"]/a/@href').extract()
         for idx, image_web_url in enumerate(image_web_urls):
             image_name = "{0}/{1:03d}.jpg".format(title, start_image_index + idx)
             image_path = os.path.join(self.root_path, image_name)
             if os.path.isfile(image_path):
                 continue
-            request = scrapy.Request(image_web_url, callback=self.parse_image)
+            request = scrapy.Request(response.urljoin(image_web_url), callback=self.parse_image)
             request.meta['image_name'] = image_name
             yield request
 
-        no_next_page_sign = sel.xpath('//td[@class="ptdd"]/text()').extract()
-        if len(no_next_page_sign) == 0 or no_next_page_sign[0] != u'>':
-            next_page_url = response.xpath('//table[@class="ptb"]/tr/td/a/@href').extract()[-1]
-            next_page_url = response.urljoin(next_page_url.strip())
-            request = scrapy.Request(next_page_url, callback=self.parse)
-            request.meta[start_image_index_key] = len(image_web_urls) + start_image_index
-            request.meta[title_key] = title
-            yield request
+        # no_next_page_sign = sel.xpath('//td[@class="ptdd"]/text()').extract()
+        # if len(no_next_page_sign) == 0 or no_next_page_sign[0] != u'>':
+        #     next_page_url = response.xpath('//table[@class="ptb"]/tr/td/a/@href').extract()[-1]
+        #     next_page_url = response.urljoin(next_page_url.strip())
+        #     request = scrapy.Request(next_page_url, callback=self.parse)
+        #     request.meta[start_image_index_key] = len(image_web_urls) + start_image_index
+        #     request.meta[title_key] = title
+        #     yield request
 
     def parse_image(self, response):
         sel = Selector(response)
-        option_sections = sel.xpath('//img').extract()
-        image_url = ''
-        for section in option_sections:
-            keyword = 'id="img"'
-            if keyword in section:
-                pattern = 'src="([^"]+)"'
-                image_url = re.search(pattern, section).group(1)
+        section = sel.xpath('//section[@id="image-container"]').extract()[0]
+        pattern = u'src="([^"]+)"'
         item = ComicscrawlerItem()
+        image_url = re.search(pattern, section).group(1)
         item['image_name'] = response.meta['image_name']
         item['Referer'] = response.url
         item['image_urls'] = [image_url]
