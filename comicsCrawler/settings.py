@@ -33,7 +33,10 @@ IMAGES_STORE = os.path.expanduser(COMICS_ROOT_DIR)
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'comicsCrawler.pipelines.ComicscrawlerPipeline': 300,
+    'comicsCrawler.pipelines.ComicscrawlerPipeline': 300,
+}
+DOWNLOADER_MIDDLEWARES = {
+    "comicsCrawler.middlewares.UserAgentMiddleware": 401,
 }
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
