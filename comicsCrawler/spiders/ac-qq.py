@@ -12,6 +12,7 @@ Created on April 24, 2017
 import base64
 
 import scrapy
+from scrapy import Request
 from scrapy.selector import Selector
 
 from comicsCrawler.items import ComicscrawlerItem
@@ -28,7 +29,7 @@ class EhentaiSpider(scrapy.Spider):
     name = get_spider_name_from_domain(dom)
     allowed_domains = [dom]
     # custom_settings = {
-    #     'DOWNLOAD_DELAY': 0.1,
+    #     'DOWNLOAD_DELAY': 1,
     # }
 
     def __init__(self, *args, **kwargs):
@@ -44,6 +45,13 @@ class EhentaiSpider(scrapy.Spider):
         # url = re.search(pattern, url).group(0)
         return url
 
+    def make_requests_from_url(self, url):
+        return Request(url, meta={
+            'dont_filter': True,
+            'dont_redirect': True,
+            'handle_httpstatus_list': [301, 302]
+        })
+
     def parse(self, response):
         sel = Selector(response)
         title = sel.xpath('//h2[@class="works-intro-title ui-left"]/strong/text()').extract()[0]
@@ -52,7 +60,11 @@ class EhentaiSpider(scrapy.Spider):
             subtitle = episode_selector.xpath('@title').extract()[0]
             url = episode_selector.xpath('@href').extract()[0]
             url = response.urljoin(url)
-            request = scrapy.Request(url, callback=self.parse_page_one)
+            request = scrapy.Request(url, callback=self.parse_page_one, meta={
+                'dont_filter': True,
+                'dont_redirect': True,
+                'handle_httpstatus_list': [301, 302]
+            })
             request.meta['title'] = '{0}/{1}'.format(title, subtitle)
             yield request
 

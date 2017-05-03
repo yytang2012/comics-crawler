@@ -52,6 +52,7 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Disable cookies (enabled by default)
 COOKIES_ENABLED = True
+DEBUG_COOKIE = True
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
