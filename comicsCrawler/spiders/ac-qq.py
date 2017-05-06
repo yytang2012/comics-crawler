@@ -53,11 +53,13 @@ class EhentaiSpider(scrapy.Spider):
         })
 
     def parse(self, response):
+        episode_list = []
         sel = Selector(response)
         title = sel.xpath('//h2[@class="works-intro-title ui-left"]/strong/text()').extract()[0]
         episode_selectors = sel.xpath('//li/p/span[@class="works-chapter-item"]/a')
         for episode_selector in episode_selectors:
             subtitle = episode_selector.xpath('@title').extract()[0]
+            episode_list.append(subtitle)
             url = episode_selector.xpath('@href').extract()[0]
             url = response.urljoin(url)
             request = scrapy.Request(url, callback=self.parse_page_one, meta={
@@ -67,6 +69,12 @@ class EhentaiSpider(scrapy.Spider):
             })
             request.meta['title'] = '{0}/{1}'.format(title, subtitle)
             yield request
+
+        index_file = '{0}/original-index'.format(title)
+        index_path = os.path.join(self.root_path, index_file)
+        with open(index_path, 'w') as f:
+            for episode in episode_list:
+                f.write(episode + '\n')
 
     def parse_page_one(self, response):
         title = response.meta['title']

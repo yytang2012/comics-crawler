@@ -43,12 +43,25 @@ class IkanmanSpider(scrapy.Spider):
         support_url = 'http://www.ikanman.com/support/chapters.aspx?id={0}'.format(cid)
         return support_url
 
+    def save_subtitle_index(self, title, episode_list, index_name='original-index'):
+        """ Saving the subtitle sequence into orginal-index file """
+        comic_path = os.path.join(self.root_path, title)
+        if not os.path.isdir(comic_path):
+            os.mkdir(comic_path)
+        index_path = os.path.join(comic_path, index_name)
+        episode_list.reverse()
+        with open(index_path, 'w') as f:
+            for episode in episode_list:
+                f.write(episode + '\n')
+
     def parse(self, response):
+        episode_list = []
         sel = Selector(response)
         title = sel.xpath('//h1/text()').extract()[0]
         episode_selectors = sel.xpath('//li/a[@class="status0"]')
         for episode_selector in episode_selectors:
             subtitle = episode_selector.xpath('@title').extract()[0]
+            episode_list.append(subtitle)
             url = episode_selector.xpath('@href').extract()[0]
             url = response.urljoin(url)
             request = scrapy.Request(url, callback=self.parse_page_one)
@@ -59,18 +72,24 @@ class IkanmanSpider(scrapy.Spider):
             request = scrapy.Request(support_url, callback=self.parse_support_page)
             request.meta['title'] = title
             yield request
+        else:
+            """ Saving the subtitle sequence into orginal-index file """
+            self.save_subtitle_index(title, episode_list)
 
     def parse_support_page(self, response):
         title = response.meta['title']
+        episode_list = []
         sel = Selector(response)
         episode_selectors = sel.xpath('//li/a[@class="status0"]')
         for episode_selector in episode_selectors:
             subtitle = episode_selector.xpath('@title').extract()[0]
+            episode_list.append(subtitle)
             url = episode_selector.xpath('@href').extract()[0]
             url = response.urljoin(url)
             request = scrapy.Request(url, callback=self.parse_page_one)
             request.meta['title'] = '{0}/{1}'.format(title, subtitle)
             yield request
+        self.save_subtitle_index(title, episode_list)
 
     def parse_page_one(self, response):
         title = response.meta['title']
