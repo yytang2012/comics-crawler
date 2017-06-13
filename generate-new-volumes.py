@@ -43,7 +43,6 @@ def load_episode_list(root):
     with open(index_path, 'r') as f:
         for episode in f.readlines():
             episode_list.append(episode.strip())
-            print(episode)
     return episode_list
 
 
@@ -57,10 +56,16 @@ def generate_new_volume(root, comic_name):
     new_comic_path = os.path.join(root, new_comic_name)
     if not os.path.isdir(new_comic_path):
         os.makedirs(new_comic_path)
+    """ Write the episode_list into the new comic directory """
+    index_file = settings['INDEX_FILE']
+    new_index_path = os.path.join(new_comic_path, index_file)
+    with open(new_index_path, 'w') as f:
+        for episode in episode_list:
+            f.write(episode + '\n')
 
     for episode in episode_list:
         print(episode)
-        volume_name = 'volume{0}'.format(volume_id)
+        volume_name = 'volume{0:02d}'.format(volume_id)
         volume_path = os.path.join(new_comic_path, volume_name)
         if not os.path.isdir(volume_path):
             os.makedirs(volume_path)
@@ -79,7 +84,7 @@ def generate_new_volume(root, comic_name):
 
 
 if __name__ == '__main__':
-    comic_name = '一拳超人'
+    comic_name = '妖神记'
     root_dir = os.path.expanduser(settings['IMAGES_STORE'])
     save_episode_list(root_dir, comic_name)
     input('Press any key after you finish editing: ')
