@@ -21,7 +21,7 @@ class Comics177Spider(scrapy.Spider):
     """
     classdocs
 
-    example: www.177pic.info/html/2015/07/952461.html
+    example: http://www.177pic.info/html/2015/07/952461.html
     """
     dom = 'www.177pic.info'
     name = get_spider_name_from_domain(dom)

@@ -14,18 +14,18 @@ from comicsCrawler.items import ComicscrawlerItem
 from libs.misc import *
 
 
-class IkanmanSpider(scrapy.Spider):
+class ManhuaguiSpider(scrapy.Spider):
     """
     classdocs
 
-    example: http://www.ikanman.com/comic/11230/
+    example: http://www.manhuagui.com/comic/11230/
     """
-    dom = 'www.ikanman.com'
+    dom = 'www.manhuagui.com'
     name = get_spider_name_from_domain(dom)
     allowed_domains = [dom]
 
     def __init__(self, *args, **kwargs):
-        super(IkanmanSpider, self).__init__(*args, **kwargs)
+        super(ManhuaguiSpider, self).__init__(*args, **kwargs)
         self.root_path = kwargs['root_path']
         urls = kwargs['start_urls']
         self.start_urls = [self.polish_url(url) for url in urls]
@@ -33,14 +33,14 @@ class IkanmanSpider(scrapy.Spider):
 
     def polish_url(self, url):
         url = url.strip('\n').strip()
-        pattern = 'http://www.ikanman.com/comic/([\d]+)'
+        pattern = 'http://www.manhuagui.com/comic/([\d]+)'
         url = re.search(pattern, url).group(0)
         return url
 
     def get_support_url(self, url):
-        pattern = 'http://www.ikanman.com/comic/([\d]+)'
+        pattern = 'http://www.manhuagui.com/comic/([\d]+)'
         cid = re.search(pattern, url).group(1)
-        support_url = 'http://www.ikanman.com/support/chapters.aspx?id={0}'.format(cid)
+        support_url = 'http://www.manhuagui.com/support/chapters.aspx?id={0}'.format(cid)
         return support_url
 
     def save_subtitle_index(self, title, episode_list, index_name='original-index'):
@@ -99,8 +99,8 @@ class IkanmanSpider(scrapy.Spider):
 
         """ emulate the javascript environment """
         rootDirPath = os.getcwd()
-        """ Step one: analyze the ikanman_config.js """
-        configPath = os.path.join(rootDirPath, "comicsCrawler/spiders/js/ikanman_config.js")
+        """ Step one: analyze the manhuagui_config.js """
+        configPath = os.path.join(rootDirPath, "comicsCrawler/spiders/js/manhuagui_config.js")
         with open(configPath, "rb") as f:
             configjs = f.read().decode('utf-8')
         # crypto = re.search(r"(var CryptoJS.+?)var pVars", configjs, re.S).group(1)
@@ -117,15 +117,16 @@ class IkanmanSpider(scrapy.Spider):
         ctx = execjs.compile(js)
         files, path = ctx.eval("[cInfo.files, cInfo.path]")
 
-        """ Step two: analyze the ikanman_core.js"""
-        corePath = os.path.join(rootDirPath, "comicsCrawler/spiders/js/ikanman_core.js")
+        """ Step two: analyze the manhuagui_core.js"""
+        corePath = os.path.join(rootDirPath, "comicsCrawler/spiders/js/manhuagui_core.js")
         with open(corePath, "rb") as f:
             corejs = f.read().decode('utf-8')
             # cache server list
-        servs = re.search(r"var servs=(.+?),pfuncs=", corejs).group(1)
-        servs = execjs.eval(servs)
-        servs = [host["h"] for category in servs for host in category["hosts"]]
-        host = servs[0]
+        # servs = re.search(r"var servs=(.+?),pfuncs=", corejs).group(1)
+        # servs = execjs.eval(servs)
+        # servs = [host["h"] for category in servs for host in category["hosts"]]
+        # host = servs[0]
+        host = 'us'
         utils = re.search(r"SMH\.(utils=.+?),SMH\.imgData=", corejs).group(1)
         js = utils + """;
             function getFiles(path, files, host) {

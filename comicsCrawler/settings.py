@@ -22,13 +22,15 @@ NEWSPIDER_MODULE = 'comicsCrawler.spiders'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
-
-URL_PATH = '~/novels/urlfile'
+ROOT_PATH = os.path.join(os.getcwd(), 'userData')
+URL_PATH = os.path.join(ROOT_PATH, 'urlfile.txt')
+# URL_PATH = '~/novels/urlfile'
 INDEX_FILE = 'index'
 
 #  Comics
-COMICS_ROOT_DIR = '~/comiccrawler/download'
-IMAGES_STORE = os.path.expanduser(COMICS_ROOT_DIR)
+# COMICS_ROOT_DIR = '~/comiccrawler/download'
+# IMAGES_STORE = os.path.expanduser(COMICS_ROOT_DIR)
+IMAGES_STORE = os.path.join(ROOT_PATH, 'downloads')
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html

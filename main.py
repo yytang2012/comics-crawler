@@ -12,9 +12,12 @@ class ComicsCrawler:
     crawler_process = CrawlerProcess(get_project_settings())
 
     def __init__(self):
+        root_path = settings['ROOT_PATH']
+        if not os.path.isdir(root_path):
+            os.makedirs(root_path)
         self._start_urls = defaultdict(lambda: [])
-        self.url_path = os.path.expanduser(settings['URL_PATH'])
-        self.root_path = os.path.expanduser(settings['IMAGES_STORE'])
+        self.url_path = settings['URL_PATH']
+        self.image_download_path = settings['IMAGES_STORE']
         self.allowed_domains = self.get_allowed_domains(True)
 
     def get_allowed_domains(self, write_to_file=False):
@@ -49,7 +52,7 @@ class ComicsCrawler:
 
     def start_downloading(self):
         for spider_name, start_urls in self._start_urls.items():
-            self.crawler_process.crawl(spider_name, start_urls=start_urls, root_path=self.root_path)
+            self.crawler_process.crawl(spider_name, start_urls=start_urls, root_path=self.image_download_path)
         self.crawler_process.start()
 
 
