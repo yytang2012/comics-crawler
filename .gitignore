@@ -96,4 +96,6 @@ ENV/
 .ropeproject
 
 .idea/
-userData/*
+userData/downloads/
+
+test/

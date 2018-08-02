@@ -38,6 +38,9 @@ class EhentaiSpider(scrapy.Spider):
         url = url.strip('\n').strip()
         # pattern = 'https://e-hentai.org/[\w]/421552/4a24a76b83'
         # url = re.search(pattern, url).group(0)
+        suffix = '?nw=always'
+        if url[-len(suffix):] != suffix:
+            url += suffix
         return url
 
     def parse(self, response):
@@ -52,10 +55,10 @@ class EhentaiSpider(scrapy.Spider):
         if title_key in response.meta:
             title = response.meta[title_key]
         else:
-            ss = sel.xpath('//h1/text()').extract()[0]
-            title = ss.replace(u'[中文]', '')
+            title = sel.xpath('//h1/text()').extract()[0]
+            title = polish_string(title)
 
-        image_web_urls = sel.xpath('//div[@class="gdtm"]/div/a/@href').extract()
+        image_web_urls = sel.xpath('//div[@id="gdt"]/div/div/a/@href').extract()
         for idx, image_web_url in enumerate(image_web_urls):
             image_name = "{0}/{1:03d}.jpg".format(title, start_image_index + idx)
             image_path = os.path.join(self.root_path, image_name)
@@ -65,9 +68,9 @@ class EhentaiSpider(scrapy.Spider):
             request.meta['image_name'] = image_name
             yield request
 
-        no_next_page_sign = sel.xpath('//td[@class="ptdd"]/text()').extract()
-        if len(no_next_page_sign) == 0 or no_next_page_sign[0] != u'>':
-            next_page_url = response.xpath('//table[@class="ptb"]/tr/td/a/@href').extract()[-1]
+        no_next_page_sign = sel.xpath('//div[@class="gtb"]/table/tr/td[contains(text(), "&gt;")]').extract()
+        if len(no_next_page_sign) == 0:
+            next_page_url = response.xpath('//div[@class="gtb"]/table//tr/td/a/@href').extract()[-1]
             next_page_url = response.urljoin(next_page_url.strip())
             request = scrapy.Request(next_page_url, callback=self.parse)
             request.meta[start_image_index_key] = len(image_web_urls) + start_image_index

@@ -52,3 +52,19 @@ def load_from_json(filePath):
     else:
         data = None
     return data
+
+
+def polish_string(title, useless_ending='xxx'):
+    """Return a safe directory name."""
+    title = re.sub("《|》|~|[中文]|[Chinese]", "", title).strip()
+    title = re.sub("[/\\\?\|<>:\"\*]", " ", title).strip()
+    title = re.sub('\s+', ' ', title).strip()
+    title = re.sub(' \[\]', '', title).strip()
+    # uselessEndings = [".txt", "txt", '全文阅读', '最新章节', useless_ending]
+    #
+    # for ending in uselessEndings:
+    #     position = title.find(ending)
+    #     position = position if position != -1 else len(title)
+    #     # print('{0}-{1}-{2}'.format(ending, title, position))
+    #     title = title[0:position]
+    return title
