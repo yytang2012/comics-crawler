@@ -25,7 +25,8 @@ class ComicscrawlerPipeline(ImagesPipeline):
             if key not in headers:
                 headers[key] = self.default_headers[key]
         headers["Referer"] = item['Referer']
-        return [scrapy.Request(x, headers=headers, meta={'image_name': item['image_name']})
+        cookies = item['cookies'] if 'cookies' in item else None
+        return [scrapy.Request(x, headers=headers, meta={'image_name': item['image_name']}, cookies=cookies)
                 for x in item.get('image_urls', [])]
 
     def get_images(self, response, request, info):

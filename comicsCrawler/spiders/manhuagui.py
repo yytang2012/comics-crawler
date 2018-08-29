@@ -5,6 +5,8 @@ Created on Dec 25, 2015
 
 @author: yytang
 """
+from itertools import cycle
+from urllib.parse import urlencode
 
 import execjs
 import scrapy
@@ -12,17 +14,20 @@ from scrapy.selector import Selector
 
 from comicsCrawler.items import ComicscrawlerItem
 from libs.misc import *
-
+from node_vm2 import VM, eval
 
 class ManhuaguiSpider(scrapy.Spider):
     """
     classdocs
 
-    example: http://www.manhuagui.com/comic/11230/
+    example: https://www.manhuagui.com/comic/17965/
     """
     dom = 'www.manhuagui.com'
     name = get_spider_name_from_domain(dom)
     allowed_domains = [dom]
+    custom_settings = {
+        'DOWNLOAD_DELAY': 0.35,
+    }
 
     def __init__(self, *args, **kwargs):
         super(ManhuaguiSpider, self).__init__(*args, **kwargs)
@@ -33,7 +38,7 @@ class ManhuaguiSpider(scrapy.Spider):
 
     def polish_url(self, url):
         url = url.strip('\n').strip()
-        pattern = 'http://www.manhuagui.com/comic/([\d]+)'
+        pattern = 'https?://www.manhuagui.com/comic/([\d]+)'
         url = re.search(pattern, url).group(0)
         return url
 
@@ -94,14 +99,25 @@ class ManhuaguiSpider(scrapy.Spider):
     def parse_page_one(self, response):
         title = response.meta['title']
         html = response.body.decode('utf-8')
-        refUrl = response.url
-        js = "var window = global;"
+        ref_url = response.url
+        js = """
+        	var window = global;
+        	var cInfo;
+        	var SMH = {
+        		imgData: function(data) {
+        			cInfo = data;
+        			return {
+        				preInit: function(){}
+        			};
+        		},
+        	};
+        	"""
 
         """ emulate the javascript environment """
-        rootDirPath = os.getcwd()
+        root_dir_path = os.getcwd()
         """ Step one: analyze the manhuagui_config.js """
-        configPath = os.path.join(rootDirPath, "comicsCrawler/spiders/js/manhuagui_config.js")
-        with open(configPath, "rb") as f:
+        config_path = os.path.join(root_dir_path, "comicsCrawler/spiders/js/manhuagui_config.js")
+        with open(config_path, "rb") as f:
             configjs = f.read().decode('utf-8')
         # crypto = re.search(r"(var CryptoJS.+?)var pVars", configjs, re.S).group(1)
         js += re.search(
@@ -109,35 +125,63 @@ class ManhuaguiSpider(scrapy.Spider):
             configjs,
             re.MULTILINE
         ).group()
+
         js += re.search(
             r'<script type="text/javascript">((eval|window\["\\x65\\x76\\x61\\x6c"\]).+?)</script',
             html
         ).group(1)
         """ run javascript """
-        ctx = execjs.compile(js)
-        files, path = ctx.eval("[cInfo.files, cInfo.path]")
+        # ctx = execjs.compile(js)
+        # files, path, md5, cid = ctx.eval("[cInfo.files, cInfo.path, cInfo.sl.md5, cInfo.cid]")
+        with VM(js) as vm:
+            files, path, md5, cid = vm.run("[cInfo.files, cInfo.path, cInfo.sl.md5, cInfo.cid]")
 
         """ Step two: analyze the manhuagui_core.js"""
-        corePath = os.path.join(rootDirPath, "comicsCrawler/spiders/js/manhuagui_core.js")
-        with open(corePath, "rb") as f:
+        core_path = os.path.join(root_dir_path, "comicsCrawler/spiders/js/manhuagui_core.js")
+        with open(core_path, "rb") as f:
             corejs = f.read().decode('utf-8')
-            # cache server list
+
+        # # cache server list
         # servs = re.search(r"var servs=(.+?),pfuncs=", corejs).group(1)
-        # servs = execjs.eval(servs)
+        # servs = eval(servs)
         # servs = [host["h"] for category in servs for host in category["hosts"]]
-        # host = servs[0]
+        #
+        # global servers
+        # servers = cycle(servs)
+        #
+        # host = next(servers)
         host = 'us'
         utils = re.search(r"SMH\.(utils=.+?),SMH\.imgData=", corejs).group(1)
-        js = utils + """;
+        # js = utils + """;
+        #     function getFiles(path, files, host) {
+        #         // lets try if it will be faster in javascript
+        #         return files.map(function(file){
+        #             return utils.getPath(host, path + file);
+        #         });
+        #     }
+        #     """
+        js = """        
+            var location = {
+                protocol: "http:"
+            };
+            """ + utils + """;
             function getFiles(path, files, host) {
                 // lets try if it will be faster in javascript
                 return files.map(function(file){
                     return utils.getPath(host, path + file);
                 });
-            }
-            """
-        ctx = execjs.compile(js)
-        urls = ctx.call("getFiles", path, files, host)
+            }        
+        """
+        # ctx = execjs.compile(js)
+        # urls = ctx.call("getFiles", path, files, host)
+        with VM(js) as vm:
+            urls = vm.call("getFiles", path, files, host)
+
+        params = urlencode({
+            "cid": cid,
+            "md5": md5
+        })
+        urls = ['{url}?{params}'.format(url=url, params=params) for url in urls]
 
         for idx, url in enumerate(urls):
             img_name = "{0}/{1:03d}.jpg".format(title, idx + 1)
@@ -146,6 +190,6 @@ class ManhuaguiSpider(scrapy.Spider):
                 continue
             item = ComicscrawlerItem()
             item['image_urls'] = [url]
-            item['Referer'] = refUrl
+            item['Referer'] = ref_url
             item['image_name'] = img_name
             yield item

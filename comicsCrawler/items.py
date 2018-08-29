@@ -13,3 +13,4 @@ class ComicscrawlerItem(scrapy.Item):
     image_name = scrapy.Field()
     image_urls = scrapy.Field()
     Referer = scrapy.Field()
+    cookies = scrapy.Field()

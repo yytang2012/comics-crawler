@@ -30,7 +30,8 @@ INDEX_FILE = 'index'
 #  Comics
 # COMICS_ROOT_DIR = '~/comiccrawler/download'
 # IMAGES_STORE = os.path.expanduser(COMICS_ROOT_DIR)
-IMAGES_STORE = os.path.join(ROOT_PATH, 'downloads')
+# IMAGES_STORE = os.path.join(ROOT_PATH, 'downloads')
+IMAGES_STORE = 'F:\comicsDownload'
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html

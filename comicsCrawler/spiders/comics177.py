@@ -55,10 +55,11 @@ class Comics177Spider(scrapy.Spider):
             ss = sel.xpath('//h1/text()').extract()[0]
             title = ss.replace(u'[中文]', '')
 
-        image_urls = sel.xpath('//img/@src').extract()
+        image_urls = sel.xpath('//p/img/@src').extract()
         image_number = len(image_urls)
         for picture_index in range(0, image_number):
             image_name = "{0}/{1:03d}.jpg".format(title, start_image_index + picture_index)
+            image_name = os.path.join('177pic', image_name)
             image_path = os.path.join(self.root_path, image_name)
             if os.path.isfile(image_path):
                 continue
