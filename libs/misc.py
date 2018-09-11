@@ -56,7 +56,7 @@ def load_from_json(filePath):
 
 def polish_string(title, useless_ending='xxx'):
     """Return a safe directory name."""
-    title = re.sub("《|》|~|[中文]|[Chinese]", "", title).strip()
+    title = re.sub("《|》|~|[中文]|[Chinese]|【エロ漫画】", "", title).strip()
     title = re.sub("[/\\\?\|<>:\"\*]", " ", title).strip()
     title = re.sub('\s+', ' ', title).strip()
     title = re.sub(' \[\]', '', title).strip()
