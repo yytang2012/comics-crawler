@@ -37,7 +37,7 @@ class Comics177Spider(ComicSpider):
 
     def parse_next_page(self, response):
         sel = Selector(response)
-        next_page = sel.xpath('//pp/a[contains(text(), "下一页") or contains(text(), "下一頁")]/@href').extract()
+        next_page = sel.xpath('//p/a[contains(text(), "下一页") or contains(text(), "下一頁")]/@href').extract()
         if next_page:
             next_page_url = next_page[0]
             next_page_url = response.urljoin(next_page_url.strip())

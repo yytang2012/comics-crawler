@@ -9,6 +9,7 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 import os
+import sys
 
 BOT_NAME = 'comicsCrawler'
 
@@ -31,7 +32,10 @@ INDEX_FILE = 'index'
 # COMICS_ROOT_DIR = '~/comiccrawler/download'
 # IMAGES_STORE = os.path.expanduser(COMICS_ROOT_DIR)
 # IMAGES_STORE = os.path.join(ROOT_PATH, 'downloads')
-IMAGES_STORE = 'F:\comicsDownload'
+if sys.platform.lower() == 'linux':
+    IMAGES_STORE = os.path.expanduser('~/comicsDownload')
+else:
+    IMAGES_STORE = 'F:\comicsDownload'
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html

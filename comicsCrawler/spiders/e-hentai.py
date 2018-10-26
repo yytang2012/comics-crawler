@@ -52,13 +52,14 @@ class EhentaiSpider(scrapy.Spider):
         urls = kwargs['start_urls']
         self.start_urls = [self.polish_url(url) for url in urls]
         self.headers = {"Referer": 'https://e-hentai.org/'}
-        self.cookie_flag = False
+        self.cookie_flag = True
         print(self.start_urls)
 
     def start_requests(self):
         for i, url in enumerate(self.start_urls):
             print(url)
-            yield Request(url, callback=self.parse, headers=self.headers)
+            yield Request(url, callback=self.parse, headers=self.headers,
+                                     cookies=self.cookies, dont_filter=True)
 
     def polish_url(self, url):
         url = url.strip('\n').strip()
