@@ -2,3 +2,4 @@ image
 PyExecJS
 scrapy
 selenium
+node_vm2

@@ -24,7 +24,7 @@ def generate_episode_list(root):
             episode_list.append(str(folder))
 
     def sort_func(s):
-        p = '[^\d]+([\d]+)'
+        p = '[^\d]*([\d]+)'
         m = re.search(p, s)
         if m is None:
             return 0
@@ -84,7 +84,7 @@ def generate_new_volume(root, comic_name):
 
 
 if __name__ == '__main__':
-    comic_name = '妖神记'
+    comic_name = '王牌御史'
     root_dir = os.path.expanduser(settings['IMAGES_STORE'])
     save_episode_list(root_dir, comic_name)
     input('Press any key after you finish editing: ')
