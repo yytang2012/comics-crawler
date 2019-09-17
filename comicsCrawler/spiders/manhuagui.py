@@ -26,7 +26,7 @@ class ManhuaguiSpider(scrapy.Spider):
     name = get_spider_name_from_domain(dom)
     allowed_domains = [dom]
     custom_settings = {
-        'DOWNLOAD_DELAY': 0.35,
+        'DOWNLOAD_DELAY': 0.8,
     }
 
     def __init__(self, *args, **kwargs):

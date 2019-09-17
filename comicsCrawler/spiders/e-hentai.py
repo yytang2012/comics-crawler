@@ -15,6 +15,7 @@ from scrapy import Request
 from scrapy.selector import Selector
 
 from comicsCrawler.items import ComicscrawlerItem
+from comicsCrawler.spiders.private_data import e_hentai_cookies
 from libs.misc import *
 
 
@@ -29,21 +30,8 @@ class EhentaiSpider(scrapy.Spider):
     allowed_domains = [dom]
     handle_httpstatus_list = [404]
 
-    # custom_settings = {
-    #     'DOWNLOAD_DELAY': 0.3,
-    # }
-    cookies = {
-        '__cfduid': 'd0f23c2883fe1e2526cfe6e749ed6173e1533151642',
-        'sl': 'dm_1',
-        'ipb_member_id': '1039879',
-        'ipb_pass_hash': '88ad7a6e54e50fdadc433b31f07d0438',
-        's': '517f35e6a',
-        'sk': '6fg32opaik0r7369zkfq6e1hn08j',
-        'star': '3-502c1520f8',
-        'hath_perks': 'a.tf.s.q.t1.t2.t3.m1.m2.m3-34dbb35653',
-        'nw': '1',
-        'event': '1533239573',
-        'lv': '1533231796-1533241355'
+    custom_settings = {
+        'DOWNLOAD_DELAY': 0.3,
     }
 
     def __init__(self, *args, **kwargs):
@@ -59,7 +47,7 @@ class EhentaiSpider(scrapy.Spider):
         for i, url in enumerate(self.start_urls):
             print(url)
             yield Request(url, callback=self.parse, headers=self.headers,
-                                     cookies=self.cookies, dont_filter=True)
+                          cookies=e_hentai_cookies, dont_filter=True)
 
     def polish_url(self, url):
         url = url.strip('\n').strip()
@@ -74,7 +62,7 @@ class EhentaiSpider(scrapy.Spider):
         if response.status == 404:
             self.cookie_flag = True
             request = scrapy.Request(response.url, callback=self.parse, headers=self.headers,
-                                     cookies=self.cookies, dont_filter=True)
+                                     cookies=e_hentai_cookies, dont_filter=True)
             yield request
         else:
             sel = Selector(response)
@@ -104,14 +92,14 @@ class EhentaiSpider(scrapy.Spider):
                     continue
                 if self.cookie_flag:
                     request = scrapy.Request(image_web_url, callback=self.parse_image, headers=self.headers,
-                                             cookies=self.cookies, dont_filter=True)
+                                             cookies=e_hentai_cookies, dont_filter=True)
                 else:
                     request = scrapy.Request(image_web_url, callback=self.parse_image, headers=self.headers)
 
                 request.meta['image_name'] = image_name
                 yield request
 
-            no_next_page_sign = sel.xpath('//div[@class="gtb"]/table/tr/td[contains(text(), "&gt;")]').extract()
+            no_next_page_sign = sel.xpath('//div[@class="gtb"]/table/tr/td[contains(text(), ">")]').extract()
             if len(no_next_page_sign) == 0:
                 next_page_url = response.xpath('//div[@class="gtb"]/table//tr/td/a/@href').extract()[-1]
                 next_page_url = response.urljoin(next_page_url.strip())
@@ -133,5 +121,5 @@ class EhentaiSpider(scrapy.Spider):
         item['image_name'] = response.meta['image_name']
         item['Referer'] = response.url
         item['image_urls'] = [image_url]
-        item['cookies'] = self.cookies
+        item['cookies'] = e_hentai_cookies
         yield item

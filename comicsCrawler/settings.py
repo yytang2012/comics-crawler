@@ -24,9 +24,10 @@ NEWSPIDER_MODULE = 'comicsCrawler.spiders'
 ROBOTSTXT_OBEY = False
 
 ROOT_PATH = os.path.join(os.getcwd(), 'userData')
-URL_PATH = os.path.join(ROOT_PATH, 'urlfile.txt')
+URI_PATH = os.path.join(ROOT_PATH, 'urifile.txt')
 # URL_PATH = '~/novels/urlfile'
 INDEX_FILE = 'index'
+PROXY_FILE = os.path.join(ROOT_PATH, 'proxy-file.txt')
 
 #  Comics
 # COMICS_ROOT_DIR = '~/comiccrawler/download'
@@ -44,6 +45,7 @@ ITEM_PIPELINES = {
 }
 DOWNLOADER_MIDDLEWARES = {
     "comicsCrawler.middlewares.UserAgentMiddleware": 401,
+    # 'comicsCrawler.middlewares.ProxyDownloaderMiddleware': 201,
 }
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
