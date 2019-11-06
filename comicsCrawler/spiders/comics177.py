@@ -32,12 +32,12 @@ class Comics177Spider(ComicSpider):
     def parse_page(self, response):
         sel = Selector(response)
         is_page = False
-        image_urls = sel.xpath('//p/img/@src').extract()
+        image_urls = sel.xpath('//p/img/@data-lazy-src').extract()
         return image_urls, is_page
 
     def parse_next_page(self, response):
         sel = Selector(response)
-        next_page = sel.xpath('//p/a[contains(text(), "下一页") or contains(text(), "下一頁")]/@href').extract()
+        next_page = sel.xpath('//div[@class="page-links"]/a/span/i[@class="be be-arrowright"]/../../@href').extract()
         if next_page:
             next_page_url = next_page[0]
             next_page_url = response.urljoin(next_page_url.strip())

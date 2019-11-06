@@ -16,7 +16,7 @@ class ComicsCrawler:
         if not os.path.isdir(root_path):
             os.makedirs(root_path)
         self._start_urls = defaultdict(lambda: [])
-        self.url_path = settings['URL_PATH']
+        self.uri_path = settings['URI_PATH']
         self.image_download_path = settings['IMAGES_STORE']
         self.allowed_domains = self.get_allowed_domains(True)
 
@@ -37,7 +37,7 @@ class ComicsCrawler:
 
     def start_url_init(self, urls=None):
         if not urls:
-            with open(self.url_path, 'r') as f:
+            with open(self.uri_path, 'r') as f:
                 urls = f.readlines()
         # 1. Remove the spaces
         # 2. Convert the urls to supported format
