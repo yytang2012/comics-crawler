@@ -1,5 +1,5 @@
 image
 PyExecJS
-scrapy
+scrapy==1.8.0
 selenium
 node_vm2

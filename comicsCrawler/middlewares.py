@@ -1,8 +1,6 @@
 # encoding=utf-8
-import os
 import random
 
-from scrapy.conf import settings
 from libs.user_agents import agents
 
 

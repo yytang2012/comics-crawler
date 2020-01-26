@@ -1,6 +1,4 @@
 from collections import defaultdict
-
-from scrapy.conf import settings
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
@@ -9,9 +7,10 @@ from libs.urlcheck import url_check
 
 
 class ComicsCrawler:
-    crawler_process = CrawlerProcess(get_project_settings())
 
     def __init__(self):
+        settings = get_project_settings()
+        self.crawler_process = CrawlerProcess(settings)
         root_path = settings['ROOT_PATH']
         if not os.path.isdir(root_path):
             os.makedirs(root_path)
