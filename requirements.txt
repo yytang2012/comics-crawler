@@ -3,3 +3,4 @@ PyExecJS
 scrapy==1.8.0
 selenium
 node_vm2
+opencv-python==3.4.*
